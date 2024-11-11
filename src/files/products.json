@@ -1,0 +1,35 @@
+[
+	{
+		"id": 1,
+		"title": "Caño de escape",
+		"description": " Descripcion producto",
+		"code": " 123123",
+		"price": 500,
+		"status": false,
+		"stock": 50,
+		"category": " madera",
+		"thumbnails": []
+	},
+	{
+		"id": 2,
+		"title": "Caño de escape",
+		"description": " Descripcion producto 2",
+		"code": " 123123",
+		"price": 700,
+		"status": false,
+		"stock": 20,
+		"category": " aluminio",
+		"thumbnails": []
+	},
+	{
+		"id": 3,
+		"title": "Neumaticos Motos",
+		"description": " Descripcion producto 2",
+		"code": " 123321",
+		"price": 400,
+		"status": false,
+		"stock": null,
+		"category": " carrera",
+		"thumbnails": []
+	}
+]
