@@ -49,10 +49,6 @@ export default class ProductManager {
         try {
             const { title, description, code, price, stock, category, status = true } = data;
 
-            if (!title || !description || !code || !price || stock == null || !category) {
-                throw new ErrorManager("Faltan datos obligatorios", 400);
-            }
-
             const product = {
                 id: generateId(await this.getAll()),
                 title,

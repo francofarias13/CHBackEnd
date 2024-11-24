@@ -1,0 +1,107 @@
+:root {
+    --primary-color: #4e4caf; /* Verde */
+    --secondary-color: #ffffff; /* Blanco */
+    --background-color: #f4f4f9; /* Gris claro */
+    --text-color: #333333; /* Gris oscuro */
+    --error-color: #ff0000; /* Rojo */
+    --border-radius: 5px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+h1{
+    color: #ffffff;
+    text-align: center;
+}
+
+h3 {
+    color: #4e4caf;
+    text-align: center;
+}
+
+p {
+    line-height: 1.6;
+}
+
+header {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    padding: 1rem 0;
+    text-align: center;
+}
+
+main {
+    margin: 2rem auto;
+    padding: 1rem;
+    max-width: 800px;
+    background-color: var(--secondary-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+section {
+    margin-bottom: 2rem;
+}
+
+.products__list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    background-color: var(--secondary-color);
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.products__list__item {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--background-color);
+}
+
+.products__list__item:last-child {
+    border-bottom: none;
+}
+
+.products__form, .products__delete {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.products__form input, .products__delete input, .products__form textarea, .products__delete button {
+    padding: 0.75rem;
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+}
+
+.products__form input[type="submit"], .products__delete button {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.products__form input[type="submit"]:hover, .products__delete button:hover {
+    background-color: #38848e;
+}
+
+.products__delete input {
+    flex-grow: 1;
+}
+
+.error-message {
+    color: var(--error-color);
+    font-weight: bold;
+    text-align: center;
+    margin-top: 1rem;
+}
