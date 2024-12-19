@@ -1,44 +1,56 @@
 <header>
-    <h1>INICIO - Productos en Tiempo Real</h1>
+
 </header>
-
-<main>
-    <section>
-        <h3>Productos</h3>
-        {{!-- Uso de nomenclatura BEM (B de bloque, E de elemento y M de modificador)--}}
-        <div class="products">
-            <div class="products__list">
-                <ul class="products__list__item" id="products-list"></ul>
-            </div>
-        </div>
-    </section>
-
+<div class="container-titles">
+    <h1 class="ecommerce-title">Todos los productos en tiempo real</h1>
+</div>
 <section>
-    <h3>Formulario de Productos</h3>
-    <form class="products__form" id="products-form">
-        <input type="text" name="title" placeholder="Nombre del producto" required>
-        <textarea name="description" placeholder="Descripción del producto"></textarea>
-        <input type="text" name="code" placeholder="Código del producto" required>
-        <input type="number" name="price" placeholder="Precio" required>
-        <input type="number" name="stock" placeholder="Stock" required>
-        <input type="text" name="category" placeholder="Categoría">
-        <div>¿Está activo?<input type="checkbox" name="status"></div>
-        <input type="submit" value="Guardar" style="width: 100%">
-    </form>
+    <div class="container-products">
+        <div class="products">
+            <ul id="product-list">
+        
+            </ul>
+        </div>
+    </div>
+
+    <div class="pagination">
+    <button id="prev-page">Página Anterior</button>
+    <span id="current-page">Página: 1</span>
+    <button id="next-page">Página Siguiente</button>
+</div>
+</section>
+<section class="form-container">
+    <div>
+        <form action="" id="insert-product" class="add-form">
+            <h3>Formulario para agregar producto</h3>
+            <input type="text" name="title" id="title" placeholder="Ingresa el nombre del producto">
+            <input type="text" name="price" id="price" placeholder="Ingresa el precio del producto">
+            <input type="text" name="description" id="description" placeholder="Ingresa la descripcion del producto">
+            <input type="text" name="stock" id="stock" placeholder="Ingresa el stock">
+            <input type="text" name="category" id="category" placeholder="Ingresa la categoria del producto">
+            <input type="text" name="code" id="code" placeholder="Ingresa el codigo del producto">
+            <div id="status"><p>Esta activo? </p>
+                <input type="checkbox" name="status" id="status">
+            </div>
+            <input type="submit" value="Guardar">
+            <p class="error-message" id="error-message"></p>
+        </form>
+    </div>
+
+    <div class="delete-container">
+        <h3>Eliminación de productos</h3>
+            <div class="ingredients__delete">
+                <input type="number" class="products__delete__input" id="input-product-id"
+                    placeholder="ID del Producto">
+                <button id="btn-delete-product">Eliminar</button>
+            </div>
+    </div>
 </section>
 
-    <section>
-        <h3>Eliminación de Productos</h3>
-        <div class="products__delete">
-            <input type="number" class="products__delete__input" id="input-product-id"
-                placeholder="ID del Producto">
-            <button id="btn-delete-product">Eliminar</button>
-        </div>
-    </section>
 
-    <p class="error-message" id="error-message"></p>
-</main>
 
-{{!-- El script de socket.io debe estar antes que home.js --}}
+   
+
 <script src="/socket.io/socket.io.js"></script>
 <script src="/api/public/js/products.socket.js"></script>
+

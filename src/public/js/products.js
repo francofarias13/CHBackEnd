@@ -1,32 +1,54 @@
-const productsList = document.getElementById("products-list");
-const btnRefreshProductsList = document.getElementById("btn-refresh-products-list");
+const btnActualizar = document.getElementById("bnt-actualizar-productos");
 
-const loadProductsList = async () => {
-    const response = await fetch("/api/products", { method: "GET" });
-    const data = await response.json();
-    const products = data.payload;
-
-    productsList.innerText = "";
-
-    products.forEach((product) => {
-        productsList.innerHTML += `
-            <li>
-                <strong>ID:</strong> ${product.id} <br>
-                <strong>Nombre:</strong> ${product.title} <br>
-                <strong>Descripción:</strong> ${product.description} <br>
-                <strong>Código:</strong> ${product.code} <br>
-                <strong>Precio:</strong> $${product.price} <br>
-                <strong>Stock:</strong> ${product.stock} <br>
-                <strong>Categoría:</strong> ${product.category} <br>
-                <strong>Activo:</strong> ${product.status ? "Sí" : "No"}
-            </li><br>`;
-    });
-};
-
-btnRefreshProductsList.addEventListener("click", () => {
-    loadProductsList();
-    console.log("¡Lista recargada!");
+btnActualizar.addEventListener("click", ()=>{
+    location.reload();
 });
 
-// Se ejecuta para cargar la lista de productos al ingresar o refrescar
-loadProductsList();
+document.addEventListener("DOMContentLoaded", () => {
+    const prevPageBtn = document.getElementById("prev-page");
+    const nextPageBtn = document.getElementById("next-page");
+    const categorySelect = document.getElementById("category");
+
+    const updateProducts = (page, category = '') => {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set("page", page);
+        if (category) urlParams.set("category", category);
+        window.location.search = urlParams.toString();
+    };
+
+    prevPageBtn.addEventListener("click", () => {
+        const currentPage = parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+        if (currentPage > 1) {
+            updateProducts(currentPage - 1, categorySelect.value);
+        }
+    });
+
+    nextPageBtn.addEventListener("click", () => {
+        const currentPage = parseInt(new URLSearchParams(window.location.search).get("page")) || 1;
+        updateProducts(currentPage + 1, categorySelect.value);
+    });
+
+    categorySelect.addEventListener("change", () => {
+        const selectedCategory = categorySelect.value;
+        updateProducts(1, selectedCategory);
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const categorySelect = document.getElementById("category");
+    const sortSelect = document.getElementById("sort");
+
+    const updateProducts = () => {
+        const category = categorySelect.value;
+        const sort = sortSelect.value;
+
+        let query = `?`;
+        if (category) query += `category=${category}&`;
+        if (sort) query += `sort=${sort}`;
+
+        window.location.href = `/products${query}`;
+    };
+
+    categorySelect.addEventListener("change", updateProducts);
+    sortSelect.addEventListener("change", updateProducts);
+});

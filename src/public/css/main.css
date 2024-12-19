@@ -56,8 +56,10 @@ section {
     border: 1px solid var(--primary-color);
     border-radius: var(--border-radius);
     background-color: var(--secondary-color);
-    max-height: 300px;
-    overflow-y: auto;
+    /* Elimina la altura fija */
+    max-height: none;
+    /* Si prefieres scroll, ajusta el alto */
+    overflow-y: visible;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
