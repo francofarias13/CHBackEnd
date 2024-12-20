@@ -2,66 +2,66 @@ import { Schema, model } from "mongoose";
 import paginate from "mongoose-paginate-v2";
 
 const productSchema = new Schema({
-    title: {
+    title:{
         type: String,
-        required: [ true, "El nombre es obligatorio" ],
-        uppercase: true,
+        required: [ true, "El nombre del producto es obligatorio" ],
         trim: true,
+        uppercase: true,
         minLength: [ 3, "El nombre debe tener al menos 3 caracteres" ],
-        maxLength: [ 25, "El nombre debe tener como máximo 30 caracteres" ],
-        index: { name: "idx_title" },
+        maxLength: [ 25, "EL nombre debe tener como máximo 25 caracteres" ],
     },
-    price: {
-        type: Number,
-        required: [ true, "El precio del producto es obligatorio" ],
-        min: [ 0, "El precio debe ser un valor positivo" ],
-    },
-    //currency: {
-     //   type: String,
-      //  required: [ true, "Es obligatorio poner la ocurrencia del producto" ],
-      //  uppercase: true,
-     //   trim: true,
-     //   minLength: [ 2, "La ocurrencia debe tener al menos dos caracteres" ],
-      //  maxLength: [ 6, "La ocurrencia debe tener maximo seis caracteres" ],
-    //},
-    description: {
+    description:{
         type: String,
-        required: [ true, "La descripcion del producto es obligatoria" ],
+        required: [ true, "La descripción del producto es obligatorio" ],
         trim: true,
-        minLength: [ 12, "La descripcion del producto debe tener al menos 3 caracteres" ],
-        maxLength: [ 60, "El nombre debe tener como máximo 25 caracteres" ],
+        maxLength: [ 50, "La descripción debe tener como máximo 50 caracteres" ],
     },
-    stock: {
-        type: Number,
-        required: [ true, "El stock del producto es obligatorio" ],
-        min: [ 0, "El stock debe ser un valor positivo" ],
-    },
-    code: {
+    category:{
         type: String,
-        required: [ true, "El codigo del producto es obligatorio" ],
+        required: [ true, "La categoría del producto es obligatorio" ],
         trim: true,
-        minLength: [ 2, "El codigo debe tener al menos dos caracteres" ],
-        maxLength: [ 10, "El codigo debe tener maximo seis caracteres" ],
+        minLength: [ 3, "La categoría debe tener al menos 3 caracteres" ],
+        maxLength: [ 15, "La categoría debe tener como máximo 15 caracteres" ],
     },
-    status: {
+    code:{
+        type: String,
+        required: [ true, "El código es obligatorio" ],
+        lowercase: true,
+        trim: true,
+        unique: true,
+        validate: {
+            validator: async function (code) {
+                const countDocuments = await this.model("products").countDocuments({
+                    _id:{ $ne: this._id },
+                    code,
+                });
+                return countDocuments===0;
+            },
+            message: "El código ya está registrado",
+        },
+    },
+    price:{
+        type: Number,
+        required: [ true, "El precio es obligatorio" ],
+        min: [ 0, "El precio debe ser un número positivo" ],
+    },
+    stock:{
+        type: Number,
+        required: [ true, "El stock es obligatorio" ],
+        min: [ 0, "El stock debe ser un número positivo" ],
+    },
+    status:{
         type: Boolean,
-        required: [ true, "El estado es obligatorio" ],
+        required: [ true, "El status es obligatorio" ],
     },
-    category: {
+    thumbnail:{
         type: String,
-        required: [ true, "La categoria del producto es obligatorio" ],
-        uppercase: true,
         trim: true,
-        minLength: [ 3, "La categoria debe tener al menos 3 caracteres" ],
-        maxLength: [ 15, "La categoria debe tener como máximo 25 caracteres" ],
-        index: { name: "idx_category" },
     },
 }, {
     timestamps: true,
     versionKey: false,
 });
-
-productSchema.index({ title:1, code:1 }, { name:"idx_title_code" });
 
 productSchema.plugin(paginate);
 

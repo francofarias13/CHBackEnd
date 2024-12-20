@@ -12,9 +12,9 @@ export default class ErrorManager extends Error {
         }
 
         if (error.code === 11000) {
-            return new ErrorManager(error.message, 400);
+            return new ErrorManager(error.message, 409);
         }
 
-        throw new ErrorManager(error.message, 500);
+        return new ErrorManager(error.message, error?.code || 500);
     }
 }

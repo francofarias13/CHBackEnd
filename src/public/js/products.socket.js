@@ -1,120 +1,144 @@
 const socket = io();
 
-const productList = document.querySelector(".container-products");
-const productsForm = document.getElementById("insert-product");
-const errorMessage = document.getElementById("error-message");
-const btnDeleteProduct = document.getElementById("btn-delete-product");
+const productsList = document.getElementById("products-list");
+const productsForm = document.getElementById("products-form");
 const inputProductId = document.getElementById("input-product-id");
-let prevPageBtn = document.getElementById("prev-page");
-let nextPageBtn = document.getElementById("next-page");
-let currentPageText = document.getElementById("current-page");
+const btnDeleteProduct = document.getElementById("btn-delete-product");
+const btnDeleteCart = document.getElementById("btn-delete-cart");
+const errorMessage = document.getElementById("error-message");
+
+let currentPage = 1;
+let currentSort = "asc";
+let globalCartId;
 
 socket.on("products-list", (data) => {
-    console.log("Datos recibidos:", data);
-    const products = data.products?.docs ?? [];
-    
-    if (!Array.isArray(products)) {
-        console.error("Los datos no son un arreglo:", products);
+    const { docs: products, totalPages=1, cartId } = data || {};
+    globalCartId = cartId;
+    productsList.innerText = "";
+
+    if (!cartId) {
+        console.error("Cart ID no recibido del servidor.");
         return;
     }
 
-    productList.innerHTML = ''; 
-
     products.forEach((product) => {
-        productList.innerHTML += `
-            <div class="product-card">
-                <ul>
-                    <li>Nombre: ${product.title}</li>
-                    <li>Precio: ${product.price}</li>
-                    <li>Categoría: ${product.category}</li>
-                    <li>Descripción: ${product.description}</li>
-                    <li>Stock: ${product.stock}</li>
-                    <li>Código: ${product.code}</li>
-                    <li>Estado: ${product.status}</li>
-                    <button class="view-product-btn" data-id="${product._id}">Ver Detalles</button>
-                </ul>
-            </div>
+        productsList.innerHTML += `<tr>
+        <td> ${product.id} </td>
+        <td> ${product.title} </td>
+        <td>${product.category}</td>
+        <td> $${product.price} </td>
+        <td>
+            <button class="btn-reset btn-info" onclick="window.location.href='/product/${product.id}'"><span class="material-icons">info</span></button>
+            <button class="add-to-cart" data-product-id="${product.id}">+</button>
+            <button class="remove-from-cart" data-product-id="${product.id}">-</button>
+        </td>
+        </tr>
         `;
     });
+    const paginationInfo = document.getElementById("pagination-info");
+    paginationInfo.dataset.totalPages = totalPages;
+    paginationInfo.innerText = `${currentPage} de ${totalPages}`;
 });
 
-prevPageBtn.addEventListener("click", () => {
+document.getElementById("prev-page").addEventListener("click", () => {
     if (currentPage > 1) {
         currentPage--;
-        loadProducts(currentPage); 
+        socket.emit("change-page", { page: currentPage, sort: currentSort });
     }
 });
 
-nextPageBtn.addEventListener("click", () => {
-    currentPage++;
-    loadProducts(currentPage);  
+socket.on("filter-products", async (data) => {
+    const { category } = data;
+    const filter = category ? { category } : {};
+    const products = await ProductManager.getAll(filter); // Ajusta según tu lógica
+    io.emit("products-list", products);
+
+    document.getElementById("category-filter").addEventListener("change", (event) => {
+        const selectedCategory = event.target.value;
+        socket.emit("filter-products", { category: selectedCategory });
+    });
 });
 
-loadProducts(currentPage);
+document.getElementById("next-page").addEventListener("click", () => {
+    const totalPages = parseInt(document.getElementById("pagination-info").dataset.totalPages, 10);
+    if (currentPage < totalPages) {
+        currentPage++;
+        socket.emit("change-page", { page: currentPage, sort: currentSort });
+    }
+});
 
+document.getElementById("tilte-asc").addEventListener("click", () => {
+    currentSort = "asc";
+    currentPage = 1;
+    socket.emit("change-page", { page: currentPage, sort: currentSort });
+});
 
+document.getElementById("tilte-desc").addEventListener("click", () => {
+    currentSort = "desc";
+    currentPage = 1;
+    socket.emit("change-page", { page: currentPage, sort: currentSort });
+});
 
-productsForm.onsubmit = (e) => {
-    e.preventDefault(); 
-    const form = e.target;
+document.body.addEventListener("click", (event) => {
+    const target = event.target;
+
+    if (target.matches(".add-to-cart")) {
+        const productId = target.dataset.productId;
+        if (productId) {
+            socket.emit("add-product", { productId });
+        }
+    }
+
+    if (target.matches(".remove-from-cart")) {
+        const productId = target.dataset.productId;
+        if (productId) {
+            socket.emit("remove-product", { productId });
+        }
+    }
+});
+
+btnDeleteCart.onclick = (event)=>{
+    if (event.target && event.target.id === "btn-delete-cart") {
+        socket.emit("delete-cart", { id: globalCartId });
+    }
+};
+
+productsForm.onsubmit = (event) => {
+    event.preventDefault();
+    const form = event.target;
     const formData = new FormData(form);
-
-    const status = formData.get("status") === "on";
-
+    const file = formData.get("file");
     errorMessage.innerText = "";
+
     form.reset();
 
     socket.emit("insert-product", {
-        title: formData.get("title"),    
-        price: formData.get("price"),        
-        description: formData.get("description"),
+        title: formData.get("title"),
+        status: formData.get("status") || "off",
         stock: formData.get("stock"),
+        category: formData.get("category"),
+        price: formData.get("price"),
         code: formData.get("code"),
-        status: status,
-        category: formData.get("category")
+        description: formData.get("description"),
+        file: {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            buffer: file,
+        },
     });
 };
 
 btnDeleteProduct.onclick = () => {
-    const id = Number(inputProductId.value);
+
+    const id = inputProductId.value;
     inputProductId.value = "";
     errorMessage.innerText = "";
 
-    if (id > 0) {
-        socket.emit("delete-product", { id });
-    }
+    socket.emit("delete-product", { id });
+
 };
 
 socket.on("error-message", (data) => {
     errorMessage.innerText = data.message;
-    console.log(data.message);
-});
-
-function showProductModal(product) {
-    const modalContent = `
-        <div class="modal">
-            <h2>${product.title}</h2>
-            <p>Precio: ${product.price}</p>
-            <p>Categoria: ${product.category}</p>
-            <p>Descripcion: ${product.description}</p>
-            <p>Stock: ${product.stock}</p>
-            <p>Codigo: ${product.code}</p>
-            <p>Estado: ${product.status}</p>
-            <button id="close-modal">Cerrar</button>
-        </div>
-    `;
-    document.body.innerHTML += modalContent;
-    document.getElementById("close-modal").onclick = () => {
-        document.querySelector(".modal").remove();
-    };
-}
-
-document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("view-product-btn")) {
-        const productId = e.target.getAttribute("data-id");
-        const product = products.find(p => p._id === productId);
-        if (product) {
-            showProductModal(product); 
-        }
-    }
 });

@@ -1,13 +1,13 @@
-import { isValidID } from "../config/mongoose.config.js";
 import ErrorManager from "./ErrorManager.js";
+import { isValidID } from "../config/mongoose.config.js";
 import ProductModel from "../models/product.model.js";
 import { convertToBoolean } from "../utils/converter.js";
 
 export default class ProductManager {
-    #product;
+    #productModel;
 
     constructor() {
-        this.#product = ProductModel;
+        this.#productModel = ProductModel;
     }
 
     async #findOneById(id) {
@@ -15,38 +15,37 @@ export default class ProductManager {
             throw new ErrorManager("ID inválido", 400);
         }
 
-        const productFound = await this.#product.findById(id);
+        const product = await this.#productModel.findById(id);
 
-        if (!productFound) {
+        if (!product) {
             throw new ErrorManager("ID no encontrado", 404);
         }
 
-        return productFound;
+        return product;
     }
 
     async getAll(params) {
         try {
             const $and = [];
 
-            if (params?.title) {
-                $and.push({ title: { $regex: params.title, $options: "i" } });
-            }
-
+            if (params?.title) $and.push({ title: { $regex: params.title, $options: "i" } });
             const filters = $and.length > 0 ? { $and } : {};
 
-            const sortOptions = {
+            const sort = {
                 asc: { title: 1 },
                 desc: { title: -1 },
             };
 
             const paginationOptions = {
-                limit: parseInt(params?.limit) || 10,
-                page: parseInt(params?.page) || 1,
-                sort: sortOptions[params?.sort] || {},
+                limit: params?.limit || 5,
+                page: params?.page || 1,
+                sort: sort[params?.sort] ?? {},
                 lean: true,
             };
-
-            return await this.#product.paginate(filters, paginationOptions);
+            const result = await this.#productModel.paginate(filters, paginationOptions);
+            result.docs = result.docs || [];
+            return result;
+            // return await this.#productModel.find();
         } catch (error) {
             throw ErrorManager.handleError(error);
         }
@@ -60,11 +59,12 @@ export default class ProductManager {
         }
     }
 
-    async insertOne(data) {
+    async insertOne(data, filename) {
         try {
-            const product = await this.#product.create({
+            const product = await this.#productModel.create({
                 ...data,
                 status: convertToBoolean(data.status),
+                thumbnail: filename ?? "image-not-found.jpg",
             });
 
             return product;
